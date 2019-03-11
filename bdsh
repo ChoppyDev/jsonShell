@@ -1,0 +1,89 @@
+#!/bin/sh
+
+# print help function
+help() {
+    echo "Usage: ./bdsh [OPTION]... [COMMAND] [REQUEST]
+        OPTION:
+        -h				display usage
+        -f FILE			        json database file
+        -j                              json formated output for select command"
+}
+
+#prints error
+error() {
+    echo "Error: $1"
+}
+
+#Check if files passed as argument exists
+checkfile(){
+    if [ -e  $1 ]
+            then
+                echo "ok"
+            else
+                error "$1 does'nt exists"
+                exit 1
+        fi
+}
+
+#Create the database if the file is not empty
+createDatabase() {
+    filesize=`wc -c < $FILENAME`
+    echo $FILENAME
+    if [ $filesize -gt 0 ]; then
+       error "non empty file"
+    else
+        echo -e "{\n}" > $1
+    fi
+}
+
+#Vars
+JSON=false;
+FILENAME="";
+#End Vars
+
+#get flags
+while getopts ":h :f: :j" opt; do
+    case $opt in
+    h) 
+        help
+        ;;
+    f)
+        FILENAME=$OPTARG
+        checkfile $FILENAME
+        ;;
+    j)
+        echo "jjjjj"
+        ;;
+    \?)
+        echo "Invalid option: $OPTARG"
+        help
+        exit 1
+        ;;
+    esac
+done
+
+# if empty arg
+if [ -z "$1" ]; then
+    help
+    exit 1
+fi
+
+#loop for args reading
+for (( i=1; i<=$#; i++)); do
+    echo "arg ${!i}"
+    j=$((i+1))
+    #echo ${!i}
+   case ${!i} in
+   create)
+    #echo "create"
+    if [ ${!j} == "database" ]; then
+        createDatabase $FILENAME
+    fi
+    if [ ${!j} == "table" ]; then
+        echo "table"
+    fi
+    ;;
+    esac
+done
+
+#@todo echo strerr output for all errors
